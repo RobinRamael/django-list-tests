@@ -42,13 +42,12 @@ if sys.argv[-1] == 'tag':
     sys.exit()
 
 readme = open('README.rst').read()
-history = open('HISTORY.rst').read().replace('.. :changelog:', '')
 
 setup(
     name='django-list-tests',
     version=version,
     description="""Add a django management command to list all tests in the project""",
-    long_description=readme + '\n\n' + history,
+    long_description=readme,
     author='Robin Ramael',
     author_email='robin.ramael@gmail.com',
     url='https://github.com/robinramael/django-list-tests',
