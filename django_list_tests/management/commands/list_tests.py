@@ -1,6 +1,9 @@
+import os
 import unittest
 
 from django.core.management import BaseCommand
+
+from django_list_tests.common import load_mru_file
 
 
 def get_test_names(suite, base_app_name, methods_only=False):
@@ -28,13 +31,29 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument("app_name", default=".", nargs="?")
         parser.add_argument("--methods-only", dest="methods_only", action="store_true")
+        parser.add_argument("--no-mru", dest="use_mru", action="store_false")
+        parser.add_argument("--out", dest="outfile", default=None)
 
     def handle(self, *args, **kwargs):
         app_name = kwargs.get("app_name", ".")
         methods_only = kwargs.get("methods_only", False)
+        outfile = kwargs.get("outfile", None)
+        use_mru = kwargs.get("use_mru", True)
+
         suite = unittest.defaultTestLoader.discover(app_name)
 
         test_names = get_test_names(suite, app_name, methods_only)
 
-        for name in test_names:
-            self.stdout.write(name)
+        if use_mru:
+            mru_tests = load_mru_file()
+            unused_tests = test_names - set(mru_tests.keys())
+            ordered_names = [test for test, _ in mru_tests.most_common()] + sorted(unused_tests)
+        else:
+            ordered_names = sorted(test_names)
+
+        if outfile:
+            with open(outfile, "w") as fp:
+                fp.writelines("{}\n".format(name) for name in ordered_names)
+        else:
+            for name in ordered_names:
+                self.stdout.write(name)
