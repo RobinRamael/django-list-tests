@@ -1,12 +1,12 @@
 from django.core.management.commands import test
 
-from django_list_tests.common import is_code_obj, load_mru_file, write_mru_file
+from django_list_tests.common import is_code_obj, TestRuns
 
 
 def mark_used(test_name):
-    mru_tests = load_mru_file()
-    mru_tests[test_name] += 1
-    write_mru_file(mru_tests)
+    runs = TestRuns.load()
+    runs.mark_run(test_name)
+    runs.write()
 
 
 class Command(test.Command):

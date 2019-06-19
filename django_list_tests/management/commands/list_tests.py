@@ -6,7 +6,7 @@ from livereload import Server
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from django_list_tests.common import load_mru_file
+from django_list_tests.common import TestRuns
 
 
 def get_test_names(suite, base_app_name, methods_only=False):
@@ -36,9 +36,9 @@ def get_sorted_test_names(app_name, use_mru=True, methods_only=False):
     test_names = get_test_names(suite, app_name, methods_only)
 
     if use_mru:
-        mru_tests = load_mru_file()
-        unused_tests = test_names - set(mru_tests.keys())
-        ordered_names = [test for test, _ in mru_tests.most_common()] + sorted(unused_tests)
+        prev_test_runs = TestRuns.load()
+        unused_tests = test_names - set(prev_test_runs.test_counter.keys())
+        ordered_names = [test for test, _ in prev_test_runs.test_counter.most_common()] + sorted(unused_tests)
     else:
         ordered_names = sorted(test_names)
 

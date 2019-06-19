@@ -5,7 +5,7 @@ from collections import Counter
 
 
 def grow(xs):
-    yield from ((xs[: i + 1], xs[i + 1 :]) for i in range(len(xs)))
+    yield from ((xs[:i + 1], xs[i + 1:]) for i in range(len(xs)))
 
 
 def get_code_obj(fqn):
@@ -45,20 +45,28 @@ def get_mru_filename():
     return os.getenv("MRU_TESTS", "./.mru_tests")
 
 
-def load_mru_file(file_name=None):
-    file_name = file_name or get_mru_filename()
-    if os.path.exists(file_name):
-        with open(file_name, "r") as fp:
-            try:
-                return Counter(json.load(fp))
-            except json.decoder.JSONDecodeError:
-                return {}
-    else:
-        return {}
+class TestRuns:
+    def __init__(self, test_counts=None):
+        self.test_counter = Counter(test_counts or {})
 
+    @classmethod
+    def load(cls, file_name=None):
+        file_name = file_name or get_mru_filename()
+        if os.path.exists(file_name):
+            with open(file_name, "r") as fp:
+                try:
+                    counts = json.load(fp)
+                    return cls(counts)
+                except json.decoder.JSONDecodeError:
+                    return cls()
+        else:
+            return cls()
 
-def write_mru_file(mru_tests, file_name=None):
-    file_name = file_name or get_mru_filename()
+    def write(self, file_name=None):
+        file_name = file_name or get_mru_filename()
 
-    with open(file_name, "w") as fp:
-        json.dump(mru_tests, fp)
+        with open(file_name, "w") as fp:
+            json.dump(self.test_counter, fp)
+
+    def mark_run(self, test_name):
+        self.test_counter[test_name] += 1
