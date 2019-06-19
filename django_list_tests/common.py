@@ -1,41 +1,36 @@
 import importlib
-from collections import Counter
 import json
 import os
+from collections import Counter
+
+
+def grow(xs):
+    yield from ((xs[: i + 1], xs[i + 1 :]) for i in range(len(xs)))
 
 
 def get_code_obj(fqn):
-    try:
-        return get_method(fqn)
-    except AttributeError:
+
+    fqn_parts = fqn.split(".")
+
+    for mod_path, tail in grow(fqn_parts):
         try:
-            return get_class(fqn)
-        except AttributeError:
-            return get_module(fqn)
+            mod_name = ".".join(mod_path)
+            mod = importlib.import_module(mod_name)
+        except ModuleNotFoundError:
+            tail = [mod_path[-1]] + tail
+            break
 
+    if not tail:
+        return mod
 
-def get_method(fqn):
+    klass_name = tail.pop(0)
+    klass = getattr(mod, klass_name)
 
-    module_name = ".".join(fqn.split(".")[:-2])
-    klass_name = fqn.split(".")[-2]
-    method_name = fqn.split(".")[-1]
+    if not tail:
+        return klass
 
-    module = importlib.import_module(module_name)
-
-    klass = getattr(module, klass_name)
+    method_name = tail.pop(0)
     return getattr(klass, method_name)
-
-
-def get_class(fqn):
-    module_name = ".".join(fqn.split(".")[:-1])
-    klass_name = fqn.split(".")[-1]
-
-    module = importlib.import_module(module_name)
-    return getattr(module, klass_name)
-
-
-def get_module(fqn):
-    return importlib.import_module(fqn)
 
 
 def is_code_obj(fqn):
