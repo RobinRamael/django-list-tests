@@ -1,6 +1,3 @@
-import json
-import os
-
 from django.core.management.commands import test
 
 from django_list_tests.common import is_code_obj, load_mru_file, write_mru_file
