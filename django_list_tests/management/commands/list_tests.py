@@ -75,22 +75,24 @@ class Command(BaseCommand):
         parser.add_argument("--methods-only", dest="methods_only", action="store_true")
         parser.add_argument("--no-mru", dest="use_mru", action="store_false")
         parser.add_argument("--out", dest="outfile", default=None)
-        parser.add_argument("--watch", action="store_true", dest="watch", default=None)
+        parser.add_argument("--watch", dest="watchdir", default=None)
 
     def handle(self, *args, **kwargs):
         app_name = kwargs.get("app_name", ".")
         methods_only = kwargs.get("methods_only", False)
         outfile = kwargs.get("outfile", None)
         use_mru = kwargs.get("use_mru", True)
-        watch = kwargs.get("watch", False)
+        watchdir = kwargs.get("watchdir", None)
 
-        if not watch:
-            return list_tests(app_name, use_mru, methods_only, outfile, self.stdout)
+        list_tests(app_name, use_mru, methods_only, outfile, self.stdout)
+
+        if not watchdir:
+            return
 
         observer = Observer()
 
         handler = ListTestsHandler(app_name, use_mru, methods_only, outfile, self.stdout)
-        observer.schedule(handler, "src/", recursive=True)
+        observer.schedule(handler, watchdir, recursive=True)
         observer.start()
 
         try:
