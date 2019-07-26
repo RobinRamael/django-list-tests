@@ -5,7 +5,8 @@ from collections import Counter
 
 
 def grow(xs):
-    yield from ((xs[:i + 1], xs[i + 1:]) for i in range(len(xs)))
+    for i in range(len(xs)):
+        yield (xs[: i + 1], xs[i + 1:])
 
 
 def get_code_obj(fqn):
@@ -46,8 +47,9 @@ def get_mru_filename():
 
 
 class TestRuns:
-    def __init__(self, test_counts=None):
+    def __init__(self, test_counts=None, last=None):
         self.test_counter = Counter(test_counts or {})
+        self.last_run = last
 
     @classmethod
     def load(cls, file_name=None):
