@@ -10,8 +10,9 @@ def mark_used(test_name):
 
 
 class Command(test.Command):
+
     def handle(self, *args, **kwargs):
-        super().handle(*args, **kwargs)
+        super(Command, self).handle(*args, **kwargs)
 
         if is_code_obj(args[0]):
             mark_used(args[0])
