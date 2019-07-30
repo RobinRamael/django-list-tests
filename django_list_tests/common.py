@@ -70,5 +70,3 @@ class TestRuns:
         with open(file_name, "w") as fp:
             json.dump(self.test_counter, fp)
 
-    def mark_run(self, test_name):
-        self.test_counter[test_name] += 1
